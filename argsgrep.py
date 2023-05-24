@@ -1,9 +1,9 @@
 # argsgrep.py
-
 import argparse
 import re
 import csv
 import os
+
 
 # Define the command line arguments
 parser = argparse.ArgumentParser(description='Parse and sort defines and plusargs from a all verilog flies in a directory/sundirs')
@@ -14,12 +14,13 @@ args = parser.parse_args()
 # Define the regex patterns for defines and plusargs
 plusarg_pattern = re.compile(r'\$(test|value)\$plusargs\(\s*"([^"]+)"')
 if_define_pattern = re.compile(r'\`(ifdef|ifndef|elsif)\s+(\w*)')
-define_pattern = re.compile(r'\`(define)\s+(\w*)')
+define_pattern = re.compile(r'\`(define)\s+(\S*)\s+(.+$)')
 
 # Create empty lists to store the defines and plusargs
 plusargs = []
 cmd_defines = []
 tb_defines = []
+all_args = []
 
 # assign directory
 directory = args.directory
@@ -46,7 +47,7 @@ for subdir, dirs, files in os.walk(directory):
                         if (type=="test"):
                             name = plusarg_match.group(2)
                         # Add the plusarg to the list as a tuple of (name, type, 'plusarg') 
-                        plusargs.append((name, type, 'plusarg'))
+                        plusargs.append((name, type, 'Plusarg'))
                         plusargs = list(dict.fromkeys(plusargs))
                         
                     # Match the ifdef/ifndef pattern  
@@ -54,8 +55,11 @@ for subdir, dirs, files in os.walk(directory):
                     if cmd_defines_match:
                         type = cmd_defines_match.group(1)
                         name = cmd_defines_match.group(2)
-                        # Add the define to the list as a tuple of (name, type, 'ifdef/ifndef') 
-                        cmd_defines.append((name, type, 'cmd_line defines'))
+                        # Add the define to the list as a tuple of (name, type, 'identifier') 
+                        if name.find('VSIM') != -1: #need logic to determine TB defines or hardcode
+                            cmd_defines.append((name, '+def', 'TB defines'))
+                        else :
+                            cmd_defines.append((name, '+def', 'CMD_LINE defines'))
                         cmd_defines = list(dict.fromkeys(cmd_defines))
                         
                     # Match the define pattern  
@@ -63,14 +67,19 @@ for subdir, dirs, files in os.walk(directory):
                     if tb_defines_match:
                         type = tb_defines_match.group(1)
                         name = tb_defines_match.group(2)
-                        # Add the define to the list as a tuple of (name, type, 'define') 
-                        tb_defines.append((name, type, 'TB defines'))
+                        def_type = tb_defines_match.group(3)
+                        # Add the define to the list as a tuple of (name, type, 'type')
+                        if def_type.find('.') != -1:
+                            tb_defines.append((name, type, 'HIER'))
+                        elif name.find('(') != -1:
+                            tb_defines.append((name, type, 'Macro'))
+                        else:
+                            tb_defines.append((name, type, 'TB defines'))    
                         tb_defines = list(dict.fromkeys(tb_defines)) 
                         
 # Sort the defines and plusargs by name
-plusargs.sort(key=lambda x: x[0])
-cmd_defines.sort(key=lambda x: x[0])
-tb_defines.sort(key=lambda x: x[0])
+all_args = plusargs + cmd_defines + tb_defines
+all_args.sort(key=lambda x: x[2])
 
 
 # Open the output CSV file and write the header row
@@ -79,5 +88,5 @@ with open(args.output, 'w') as f:
     writer.writerow(['Name', 'Type', 'Kind'])
 
     # Write the defines and plusargs to the CSV file
-    for item in cmd_defines + plusargs + tb_defines:
+    for item in all_args:
         writer.writerow(item)
