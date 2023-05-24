@@ -14,7 +14,7 @@ args = parser.parse_args()
 # Define the regex patterns for defines and plusargs
 plusarg_pattern = re.compile(r'\$(test|value)\$plusargs\(\s*"([^"]+)"')
 if_define_pattern = re.compile(r'\`(ifdef|ifndef|elsif)\s+(\w*)')
-define_pattern = re.compile(r'\`(define)\s((.*?\((.*?),(.*?)\))|\S*)\s(.+$)')
+define_pattern = re.compile(r'\`(define)\s((.*?\((.*?),(.*?)\))|.*?.*?\))\s(.+$)')
 
 # Create empty lists to store the defines and plusargs
 plusargs = []
