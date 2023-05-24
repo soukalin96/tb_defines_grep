@@ -14,7 +14,7 @@ args = parser.parse_args()
 # Define the regex patterns for defines and plusargs
 plusarg_pattern = re.compile(r'\$(test|value)\$plusargs\(\s*"([^"]+)"')
 if_define_pattern = re.compile(r'\`(ifdef|ifndef|elsif)\s+(\w*)')
-define_pattern = re.compile(r'\`(define)\s+(\S*)\s+(.+$)')
+define_pattern = re.compile(r'\`(define)\s((.*?\((.*?),(.*?)\))|\S*)\s(.+$)')
 
 # Create empty lists to store the defines and plusargs
 plusargs = []
@@ -67,7 +67,7 @@ for subdir, dirs, files in os.walk(directory):
                     if tb_defines_match:
                         type = tb_defines_match.group(1)
                         name = tb_defines_match.group(2)
-                        def_type = tb_defines_match.group(3)
+                        def_type = tb_defines_match.group(6)
                         # Add the define to the list as a tuple of (name, type, 'type')
                         if def_type.find('.') != -1:
                             tb_defines.append((name, type, 'HIER'))
