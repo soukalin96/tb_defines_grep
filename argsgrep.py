@@ -6,7 +6,7 @@ import os
 
 
 # Define the command line arguments
-parser = argparse.ArgumentParser(description='Parse and sort defines and plusargs from a all verilog flies in a directory/sundirs')
+parser = argparse.ArgumentParser(description='Parse and sort defines and plusargs from all .v/.sv/.svh flies in a directory/sundirs')
 parser.add_argument('-d', '--directory', help='The directory to search recursively', default='./')
 parser.add_argument('-o', '--output', help='The output CSV file name. Default : output.csv', default='output.csv')
 args = parser.parse_args()
