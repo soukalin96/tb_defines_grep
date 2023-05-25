@@ -9,6 +9,7 @@ import os
 parser = argparse.ArgumentParser(description='Parse and sort defines and plusargs from all .v/.sv/.svh flies in a directory/sundirs')
 parser.add_argument('-d', '--directory', help='The directory to search recursively', default='./')
 parser.add_argument('-o', '--output', help='The output CSV file name. Default : output.csv', default='output.csv')
+parser.add_argument('--defs', action='store_true', help='Adds `defines to csv')
 args = parser.parse_args()
 
 # Define the regex patterns for defines and plusargs
@@ -78,7 +79,10 @@ for subdir, dirs, files in os.walk(directory):
                         tb_defines = list(dict.fromkeys(tb_defines)) 
                         
 # Sort the defines and plusargs by name
-all_args = plusargs + cmd_defines + tb_defines
+if args.defs :
+    all_args = plusargs + cmd_defines + tb_defines
+else : 
+    all_args = plusargs + cmd_defines
 all_args.sort(key=lambda x: x[2])
 
 
