@@ -1,7 +1,7 @@
 # argsgrep.py
 import argparse
 import re
-import csv
+import csv, fileinput
 import os
 
 # Define the command line arguments
@@ -99,10 +99,11 @@ else :
 all_args.sort(key=lambda x: x[2])
 
 # Open the output CSV file and write the header row
-with open(args.output, 'w') as f:
+with open(args.output, 'w', newline='') as f:
     writer = csv.writer(f)
     writer.writerow(['Name', 'Type', 'Kind'])
 
     # Write the defines and plusargs to the CSV file
     for item in all_args:
         writer.writerow(item)
+
