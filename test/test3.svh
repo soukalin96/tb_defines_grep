@@ -3,3 +3,4 @@
 `define master(ARG) asdas
 `define STACK 8
 `define massster2(SID, PC, BA) asd\
+`define STACKYO
