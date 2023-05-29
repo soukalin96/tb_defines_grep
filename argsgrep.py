@@ -22,7 +22,6 @@ plusargs = []
 cmd_defines = []
 tb_defines = []
 all_args = []
-temp_tb = []
 
 # get TB defines match str
 file = open(args.input, "r") #need to auto populate input.csv
