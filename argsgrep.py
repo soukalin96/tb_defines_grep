@@ -4,11 +4,11 @@ import re
 import csv
 import os
 
-
 # Define the command line arguments
-parser = argparse.ArgumentParser(description='Parse and sort defines and plusargs from all .v/.sv/.svh flies in a directory/sundirs')
+parser = argparse.ArgumentParser(description='Parse and sort defines and plusargs from all .v/.sv/.svh flies in a directory/subdirs')
 parser.add_argument('-d', '--directory', help='The directory to search recursively', default='./')
 parser.add_argument('-o', '--output', help='The output CSV file name. Default : output.csv', default='output.csv')
+parser.add_argument('-i', '--input', help='The input CSV file name containing strings to dematch. Default : input.csv', default='input.csv')
 parser.add_argument('--defs', action='store_true', help='Adds `defines to csv')
 args = parser.parse_args()
 
@@ -22,7 +22,17 @@ plusargs = []
 cmd_defines = []
 tb_defines = []
 all_args = []
-temp_tb_list = ['VSIM', 'DA_IQP', 'IF_CORE_MODEL'] #need to auto generate 
+temp_tb = []
+
+# get TB defines match str
+file = open(args.input, "r") #need to auto populate input.csv
+data = list(csv.DictReader(file, delimiter=","))
+file.close()    
+
+ip_tb_defines_match = [str(row["TB defines"]) for row in data]
+ip_netlist_defines_match = [str(row["Netlist defines"]) for row in data]
+ip_tb_defines_match = list(filter(None, ip_tb_defines_match))
+ip_netlist_defines_match = list(filter(None, ip_netlist_defines_match))
 
 # assign directory
 directory = args.directory
@@ -58,7 +68,7 @@ for subdir, dirs, files in os.walk(directory):
                         type = cmd_defines_match.group(1)
                         name = cmd_defines_match.group(2)
                         # Add the define to the list as a tuple of (name, type, 'identifier') 
-                        if any(substring in name for substring in temp_tb_list): #need logic to determine TB defines or hardcode
+                        if any(substring in name for substring in ip_tb_defines_match) or any(substring in name for substring in ip_netlist_defines_match): #need logic to determine TB defines or hardcode
                             cmd_defines.append((name, '+def', 'TB defines'))
                         else :
                             cmd_defines.append((name, '+def', 'CMD_LINE defines'))
@@ -88,7 +98,6 @@ if args.defs :
 else : 
     all_args = plusargs + cmd_defines
 all_args.sort(key=lambda x: x[2])
-
 
 # Open the output CSV file and write the header row
 with open(args.output, 'w') as f:
